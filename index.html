@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>連続整数の合計計算ツール</title>
+    <!-- Tailwind CSS CDN (Allowed Domain) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* カスタムアニメーションや微調整用 */
+        .fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white shadow-xl rounded-2xl p-6 w-full max-w-md border border-slate-100">
+        <!-- ヘッダー -->
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-slate-900 mb-2">数値範囲の合計計算</h1>
+            <p class="text-sm text-slate-500">指定した開始数値から終了数値までのすべての整数を合計します。</p>
+        </div>
+
+        <!-- 入力フォーム -->
+        <div class="space-y-4">
+            <div>
+                <label for="start-number" class="block text-sm font-medium text-slate-700 mb-1">はじめの数値（開始）</label>
+                <input type="number" id="start-number" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none" placeholder="例: 1">
+            </div>
+            
+            <div>
+                <label for="end-number" class="block text-sm font-medium text-slate-700 mb-1">おわりの数値（終了）</label>
+                <input type="number" id="end-number" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none" placeholder="例: 10">
+            </div>
+        </div>
+
+        <!-- エラーメッセージ表示エリア -->
+        <div id="error-message" class="hidden mt-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm text-center font-medium fade-in"></div>
+
+        <!-- アクションボタン -->
+        <div class="grid grid-cols-2 gap-3 mt-6">
+            <button id="clear-btn" class="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition-colors active:scale-[0.98]">
+                クリア
+            </button>
+            <button id="calc-btn" class="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition-colors active:scale-[0.98]">
+                計算する
+            </button>
+        </div>
+
+        <!-- 計算結果表示エリア -->
+        <div id="result-container" class="hidden mt-6 pt-6 border-t border-slate-100 text-center fade-in">
+            <div class="text-sm font-medium text-slate-500 mb-1">計算結果</div>
+            <div class="text-xs text-slate-400 mb-2" id="result-formula"></div>
+            <div class="text-3xl font-extrabold text-blue-600 tracking-tight" id="result-value">0</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const startInput = document.getElementById('start-number');
+            const endInput = document.getElementById('end-number');
+            const calcBtn = document.getElementById('calc-btn');
+            const clearBtn = document.getElementById('clear-btn');
+            const errorMessage = document.getElementById('error-message');
+            const resultContainer = document.getElementById('result-container');
+            const resultFormula = document.getElementById('result-formula');
+            const resultValue = document.getElementById('result-value');
+
+            // エラー表示の共通関数
+            const showError = (msg) => {
+                errorMessage.textContent = msg;
+                errorMessage.classList.remove('hidden');
+                resultContainer.classList.add('hidden');
+            };
+
+            // エラーと結果の非表示関数
+            const hideStatus = () => {
+                errorMessage.classList.add('hidden');
+                resultContainer.classList.add('hidden');
+            };
+
+            // 計算処理
+            calcBtn.addEventListener('click', () => {
+                hideStatus();
+
+                // 入力値の取得とチェック
+                const startStr = startInput.value.trim();
+                const endStr = endInput.value.trim();
+
+                if (startStr === '' || endStr === '') {
+                    showError('はじめの数値とおわりの数値の両方を入力してください。');
+                    return;
+                }
+
+                const startNum = parseInt(startStr, 10);
+                const endNum = parseInt(endStr, 10);
+
+                if (isNaN(startNum) || isNaN(endNum)) {
+                    showError('有効な整数を入力してください。');
+                    return;
+                }
+
+                if (startNum > endNum) {
+                    showError('「はじめの数値」は「おわりの数値」以下の値を入力してください。');
+                    return;
+                }
+
+                // 合計の計算（等差数列の和の公式を使用して効率的に計算）
+                // 項数 n = endNum - startNum + 1
+                const n = endNum - startNum + 1;
+                const totalSum = (n * (startNum + endNum)) / 2;
+
+                // 結果の表示
+                resultFormula.textContent = `${startNum} から ${endNum} までの合計`;
+                resultValue.textContent = totalSum.toLocaleString(); // 3桁区切りのカンマを追加
+                resultContainer.classList.remove('hidden');
+            });
+
+            // クリア処理
+            clearBtn.addEventListener('click', () => {
+                // 入力欄を空にする
+                startInput.value = '';
+                endInput.value = '';
+                
+                // エラー表示や計算結果を非表示にする（最初の入力画面に戻す）
+                hideStatus();
+            });
+        });
+    </script>
+</body>
+</html>
